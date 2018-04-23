@@ -8,6 +8,10 @@ import java.util.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 
 public class Bot extends javax.swing.JFrame {
     final String PRP = "I you he she it we they what who";  //personal pronouns
@@ -24,7 +28,7 @@ public class Bot extends javax.swing.JFrame {
     }
     
     void sendMessage(String message){
-        this.jTextArea1.setText(message);
+        this.jTextArea1.append(message);
     }
 
     /**
@@ -102,44 +106,52 @@ public class Bot extends javax.swing.JFrame {
         
     }
     void answer(String userMessage){
-        Set set = messages.entrySet();
+        search(removeStopwords(userMessage));
 
-        // Get an iterator
-        Iterator i = set.iterator();
-
-        // Display elements
-        while(i.hasNext()) {
-           for(int j = 0; j < removeStopwords(userMessage).size(); j++){
-               
-           }
-           Map.Entry me = (Map.Entry)i.next();
-           System.out.print(me.getKey() + ": ");
-           System.out.println(me.getValue());
+    }
+    int search(ArrayList<String> userMessage){
+        ArrayList<String> fileContent = new ArrayList<>();
+        try{
+            Scanner read = new Scanner (new FileInputStream("/Users/Sina/NetBeansProjects/Bot/src/bot/data.txt"));
+            while(read.hasNextLine()){
+                String line = read.nextLine();
+                fileContent.add(line);
+            }
+            read.close();
         }
+        catch (FileNotFoundException e){
+            System.out.println("fuck");
+        }
+        for(int i = 0; i < fileContent.size(); i++){
+            System.out.println(fileContent.get(i));
+        }
+        return 0;
     }
     void learn(String userMessage){
-        store(removeStopwords(userMessage));
+        store(removeStopwords(userMessage), userMessage);
         this.jTextArea1.setText(this.jTextArea1.getText() + "Bot: " + "Cool! I'll remember that." + "\n\n");
     }
     
     int messageID = 0;
-    HashMap messages = new HashMap();
     
-    void store(ArrayList<String> keywords){
+    
+    void store(ArrayList<String> keywords, String userMessage){
         
         this.messageID += 1;
-        messages.put(messageID, keywords);
-        // Get a set of the entries
-        Set set = messages.entrySet();
-
-        // Get an iterator
-        Iterator i = set.iterator();
-
-        // Display elements
-        while(i.hasNext()) {
-           Map.Entry me = (Map.Entry)i.next();
-           System.out.print(me.getKey() + ": ");
-           System.out.println(me.getValue());
+        try{
+            PrintWriter write = new PrintWriter(new FileOutputStream("/Users/Sina/NetBeansProjects/Bot/src/bot/data.txt", true));
+            write.print(this.messageID + ": ");
+            for(int i = 0; i < keywords.size(); i++){
+                if(i != keywords.size() -1 ){
+                    write.print(keywords.get(i) + ",");
+                }
+                else
+                    write.print(keywords.get(i) + "\t | \t" + userMessage + "\n");
+            }
+            write.close();
+        }
+        catch(IOException e){
+            System.out.println("gg");
         }
     }
     ArrayList<String> removeStopwords(String sentence){
@@ -151,7 +163,6 @@ public class Bot extends javax.swing.JFrame {
         for (int i = 0; i < targets.size(); i++){
             for (int j = 0; j < stopwords.length; j++){
                 if(targets.get(i).equalsIgnoreCase(stopwords[j])){
-//                    System.out.println(targets.get(i) + " is a stopword");
                     targets.remove(i);
                 }
             }
