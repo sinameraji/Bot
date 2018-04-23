@@ -1,2 +1,2 @@
 1: class,next,monday	 | 	no class next monday
-1: posisi,position	 | 	posisi is position
+10: class,next,monday	 | 	no class next monday

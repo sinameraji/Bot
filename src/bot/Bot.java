@@ -17,12 +17,16 @@ public class Bot extends javax.swing.JFrame {
     final String PRP = "I you he she it we they what who";  //personal pronouns
     final String POS = "mine yours his hers ours theirs";  //possessive pronouns
     List<String> places = Arrays.asList("s", "s", "a");
+    int messageID;
     
     /**
      * Creates new form NewJFrame
      */
     public Bot() {
         initComponents();
+        ArrayList<String> convoHistory = readFromFile();
+        this.messageID = Integer.parseInt(convoHistory.get(convoHistory.size() - 1).split(":")[0]);
+        System.out.println(this.messageID);
         sendMessage("Bot: Hello! Before you start asking me questions, give me some information about your world.\n\n");
         sendMessage("Bot: coz idk shit about things.\n\n");
     }
@@ -109,7 +113,7 @@ public class Bot extends javax.swing.JFrame {
         search(removeStopwords(userMessage));
 
     }
-    int search(ArrayList<String> userMessage){
+    ArrayList<String> readFromFile(){
         ArrayList<String> fileContent = new ArrayList<>();
         try{
             Scanner read = new Scanner (new FileInputStream("/Users/Sina/NetBeansProjects/Bot/src/bot/data.txt"));
@@ -122,8 +126,12 @@ public class Bot extends javax.swing.JFrame {
         catch (FileNotFoundException e){
             System.out.println("fuck");
         }
+        return fileContent;
+    }
+    int search(ArrayList<String> userMessage){
+        ArrayList<String> fileContent = readFromFile();
         for(int i = 0; i < fileContent.size(); i++){
-            System.out.println(fileContent.get(i));
+            System.out.println(fileContent.get(i).split("\t | \t")[0]);
         }
         return 0;
     }
@@ -132,7 +140,7 @@ public class Bot extends javax.swing.JFrame {
         this.jTextArea1.setText(this.jTextArea1.getText() + "Bot: " + "Cool! I'll remember that." + "\n\n");
     }
     
-    int messageID = 0;
+    
     
     
     void store(ArrayList<String> keywords, String userMessage){
