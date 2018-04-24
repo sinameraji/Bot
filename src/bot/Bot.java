@@ -9,6 +9,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.io.PrintWriter;
+import java.util.Locale;
+//import javax.speech.Central;
+//import javax.speech.synthesis.Synthesizer;
+//import javax.speech.synthesis.SynthesizerModeDesc;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -25,7 +29,11 @@ public class Bot extends javax.swing.JFrame {
     public Bot() {
         initComponents();
         ArrayList<String> convoHistory = readFromFile();
-        this.messageID = Integer.parseInt(convoHistory.get(convoHistory.size() - 1).split(":")[0]);
+        if (convoHistory.size() > 0){
+            this.messageID = Integer.parseInt(convoHistory.get(convoHistory.size() - 1).split(":")[0]);
+        } else
+            this.messageID = 0;
+        
         System.out.println(this.messageID);
         sendMessage("Bot: Hello! Before you start asking me questions, give me some information about your world.\n\n");
         sendMessage("Bot: coz idk shit about things.\n\n");
@@ -167,14 +175,23 @@ public class Bot extends javax.swing.JFrame {
         ArrayList<String> targets = new ArrayList<>();
         for (int i = 0; i < sentence.split(" ").length; i++){
             targets.add(sentence.split(" ")[i]);
+//            System.out.println(sentence.split(" ")[i]);
         }
         for (int i = 0; i < targets.size(); i++){
-            for (int j = 0; j < stopwords.length; j++){
-                if(targets.get(i).equalsIgnoreCase(stopwords[j])){
+            for (String stopword : stopwords) {
+                if(stopword.equalsIgnoreCase("have")){
+                    if(stopword.equalsIgnoreCase(targets.get(i)))
+                        System.out.println("have");
+                }
+                if (targets.get(i).equalsIgnoreCase(stopword)) {
+                    System.out.println("removing " + targets.get(i));
                     targets.remove(i);
+                    i = 0;
+                    break;
                 }
             }
         }
+
         return targets;
     }
     
