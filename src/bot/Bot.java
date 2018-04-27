@@ -34,7 +34,7 @@ public class Bot extends javax.swing.JFrame {
         } else
             this.messageID = 0;
         
-        System.out.println(this.messageID);
+//        System.out.println(this.messageID);
         sendMessage("Bot: Hello! Before you start asking me questions, give me some information about your world.\n\n");
         sendMessage("Bot: coz idk shit about things.\n\n");
     }
@@ -104,10 +104,10 @@ public class Bot extends javax.swing.JFrame {
         userMessage = jTextField1.getText();
         jTextField1.setText("");
         jTextArea1.setText(jTextArea1.getText() + "You: " + userMessage + "\n\n");
-        understand(userMessage);
+        if(!userMessage.equals(""))
+            understand(userMessage);
     }//GEN-LAST:event_jButton1ActionPerformed
     private void understand(String userMessage){
-        
         // label incoming message as Question OR information and process accordingly
         if(userMessage.charAt(userMessage.length()-1) == '?'){
             answer(userMessage);
@@ -115,12 +115,12 @@ public class Bot extends javax.swing.JFrame {
         else {
             learn(userMessage);
         }
-        
     }
+    
     void answer(String userMessage){
-        search(removeStopwords(userMessage));
-
+        search(toArrayListString(removeStopwords(userMessage)));
     }
+    
     ArrayList<String> readFromFile(){
         ArrayList<String> fileContent = new ArrayList<>();
         try{
@@ -136,63 +136,82 @@ public class Bot extends javax.swing.JFrame {
         }
         return fileContent;
     }
+    
     int search(ArrayList<String> userMessage){
         ArrayList<String> fileContent = readFromFile();
         for(int i = 0; i < fileContent.size(); i++){
-            System.out.println(fileContent.get(i).split("\t | \t")[0]);
+            System.out.println(fileContent.get(i).split("\t | \t")[0].split(":")[1]);
         }
         return 0;
     }
+    
     void learn(String userMessage){
-        store(removeStopwords(userMessage), userMessage);
+        store(toArrayListString(removeStopwords(userMessage)), userMessage);
         this.jTextArea1.setText(this.jTextArea1.getText() + "Bot: " + "Cool! I'll remember that." + "\n\n");
+        System.out.println("Learned incoming message: " + userMessage);
     }
-    
-    
-    
     
     void store(ArrayList<String> keywords, String userMessage){
-        
+//        System.out.println("size of keywords list: "+keywords.size());
+        keywords.removeAll(Arrays.asList(null,""));
+//        for (String k : keywords){
+//            System.out.print("*** "+k);
+//        }
         this.messageID += 1;
-        try{
-            PrintWriter write = new PrintWriter(new FileOutputStream("/Users/Sina/NetBeansProjects/Bot/src/bot/data.txt", true));
-            write.print(this.messageID + ": ");
-            for(int i = 0; i < keywords.size(); i++){
-                if(i != keywords.size() -1 ){
-                    write.print(keywords.get(i) + ",");
-                }
-                else
-                    write.print(keywords.get(i) + "\t | \t" + userMessage + "\n");
-            }
-            write.close();
+        if(keywords.size() == 0) {
+                System.out.println("nothing");
         }
-        catch(IOException e){
-            System.out.println("gg");
+        else {
+            if(keywords.get(0).equals(" ")){
+                keywords.remove(0);
+            }
+            try{
+                PrintWriter write = new PrintWriter(new FileOutputStream("/Users/Sina/NetBeansProjects/Bot/src/bot/data.txt", true));
+                write.print(this.messageID + ": ");
+                for(int i = 0; i < keywords.size(); i++){
+                    if(i != keywords.size() -1 ){
+                        write.print(keywords.get(i) + ",");
+                    }
+                    else
+                        write.print(keywords.get(i) + "\t | \t" + userMessage + "\n");
+                }
+                write.close();
+            }
+            catch(IOException e){
+                System.out.println("gg");
+            }
         }
     }
-    ArrayList<String> removeStopwords(String sentence){
-        String[] stopwords = {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"};
+    
+    ArrayList<String> messageToList(String sentence){
         ArrayList<String> targets = new ArrayList<>();
         for (int i = 0; i < sentence.split(" ").length; i++){
             targets.add(sentence.split(" ")[i]);
 //            System.out.println(sentence.split(" ")[i]);
         }
-        for (int i = 0; i < targets.size(); i++){
-            for (String stopword : stopwords) {
-                if(stopword.equalsIgnoreCase("have")){
-                    if(stopword.equalsIgnoreCase(targets.get(i)))
-                        System.out.println("have");
-                }
-                if (targets.get(i).equalsIgnoreCase(stopword)) {
-                    System.out.println("removing " + targets.get(i));
-                    targets.remove(i);
-                    i = 0;
-                    break;
-                }
-            }
-        }
-
         return targets;
+    }
+    
+    ArrayList<String> toArrayListString(String[] array){
+        ArrayList<String> thing = new ArrayList<>();
+        for (String word : array){
+            thing.add(word);
+        }
+//        System.out.println(thing.size());
+        return thing;
+    }
+    
+    String[] removeStopwords(String sentence){
+        String[] stopwords = {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"};
+        for(String stopword : stopwords){
+            String regex = "\\s*\\b" + stopword + "\\b\\s*";
+            sentence = sentence.toLowerCase().replaceAll(regex, " ");
+        }
+        
+//        System.out.println(sentence);
+//        for(String word : sentence.split(" "))
+//            System.out.println(word);
+        return sentence.split(" ");
     }
     
     public static void main(String args[]) {

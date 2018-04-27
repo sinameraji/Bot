@@ -1,6 +1,1 @@
-1: hi,bro	 | 	hi bro
-2: blue,paper,coffee,capfa,asdfasd,d	 | 	i have a blue paper coffee capfa asdfasd d
-3: brown,wallet	 | 	i have a brown wallet
-4: brown,wallet,i've,using,months	 | 	i have a brown wallet that i've been using for some months now
-5: have,a,a	 | 	i have a a a a
-6: have,a	 | 	i have a a a
+1: name,sina	 | 	My name is Sina
