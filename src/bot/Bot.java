@@ -123,7 +123,7 @@ public class Bot extends javax.swing.JFrame {
     
     void answer(String userMessage){
         basic(userMessage); //just search keywords and return most similar statement from data.txt
-//        pro(userMessage);
+        pro(userMessage);
         
     }
     void basic(String userMessage){
@@ -294,5 +294,9 @@ public class Bot extends javax.swing.JFrame {
 
     private void sayHi() {
         sendMessage("Yo");
+    }
+
+    private void pro(String userMessage) {
+        
     }
 }
