@@ -122,7 +122,7 @@ public class Bot extends javax.swing.JFrame {
     }
     
     void answer(String userMessage){
-        basic(userMessage); //just search keywords and return most similar statement from data.txt
+//        basic(userMessage); //just search keywords and return most similar statement from data.txt
         pro(userMessage);
         
     }
@@ -146,7 +146,7 @@ public class Bot extends javax.swing.JFrame {
         return fileContent;
     }
     
-    int search(ArrayList<String> userMessage){
+    String search(ArrayList<String> userMessage){
         boolean found = false;
         String latestFound = "";
         ArrayList<String> fileContent = readFromFile();
@@ -167,7 +167,7 @@ public class Bot extends javax.swing.JFrame {
                 }
             }
         }
-        return 0;
+        return "";
     }
     
     void learn(String userMessage){
@@ -296,7 +296,32 @@ public class Bot extends javax.swing.JFrame {
         sendMessage("Yo");
     }
 
-    private void pro(String userMessage) {
+    private void pro(String question) {
+        String verb = "", pronoun = "";
         
+        if(isYesNoQuestion(question)){
+            pronoun = question.split(" ")[1];
+            verb = question.split(" ")[2];
+            sendMessage("Yes " + reversePronoun(pronoun) + " " + verb + " it.");
+        }
+            
+    }
+    String reversePronoun(String pronoun){
+        if(pronoun.equalsIgnoreCase("i") || pronoun.equalsIgnoreCase("we"))
+            return "you";
+        else if(pronoun.equalsIgnoreCase("you"))
+            return "I";
+        else
+            return pronoun;
+        
+    }
+    private boolean isYesNoQuestion(String question) {
+        String[] whQuestions = {"what", "why", "when", "where", "how", "who", "whose"};
+        for (String q : whQuestions){
+            System.out.println("checking" + question.split(" ")[0]);
+            if(question.split(" ")[0].equalsIgnoreCase(q))
+                return false;   // WH question
+        }
+        return true;      // yes/no question
     }
 }
