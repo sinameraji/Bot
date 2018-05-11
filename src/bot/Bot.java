@@ -35,12 +35,12 @@ public class Bot extends javax.swing.JFrame {
             this.messageID = 0;
         
 //        System.out.println(this.messageID);
-        sendMessage("Bot: Hello! Before you start asking me questions, give me some information about your world.\n\n");
-        sendMessage("Bot: coz idk shit about things.\n\n");
+        sendMessage("Hello! Before you start asking me questions, give me some information about your world.");
+        sendMessage("coz idk shit about things.");
     }
     
     void sendMessage(String message){
-        this.jTextArea1.append(message);
+        this.jTextArea1.append("Bot: " + message + "\n\n");
     }
 
     /**
@@ -110,21 +110,30 @@ public class Bot extends javax.swing.JFrame {
     private void understand(String userMessage){
         // label incoming message as Question OR information and process accordingly
         if(userMessage.charAt(userMessage.length()-1) == '?'){
+            userMessage = userMessage.replace("?", "");
             answer(userMessage);
         }
         else {
-            learn(userMessage);
+            if(!isGreeting(userMessage))
+                learn(userMessage);
+            else
+                sayHi();
         }
     }
     
     void answer(String userMessage){
+        basic(userMessage); //just search keywords and return most similar statement from data.txt
+//        pro(userMessage);
+        
+    }
+    void basic(String userMessage){
         search(toArrayListString(removeStopwords(userMessage)));
     }
     
     ArrayList<String> readFromFile(){
         ArrayList<String> fileContent = new ArrayList<>();
         try{
-            Scanner read = new Scanner (new FileInputStream("/Users/Sina/NetBeansProjects/Bot/src/bot/data.txt"));
+            Scanner read = new Scanner (new FileInputStream("/Users/mac/Craft/bot/src/bot/data.txt"));
             while(read.hasNextLine()){
                 String line = read.nextLine();
                 fileContent.add(line);
@@ -132,15 +141,31 @@ public class Bot extends javax.swing.JFrame {
             read.close();
         }
         catch (FileNotFoundException e){
-            System.out.println("fuck");
+            System.out.println("File not found. Please update the data.txt file directory");
         }
         return fileContent;
     }
     
     int search(ArrayList<String> userMessage){
+        boolean found = false;
+        String latestFound = "";
         ArrayList<String> fileContent = readFromFile();
-        for(int i = 0; i < fileContent.size(); i++){
-            System.out.println(fileContent.get(i).split("\t | \t")[0].split(":")[1]);
+        for (String wordInMessage : userMessage){
+            for(int i = 0; i < fileContent.size(); i++){
+                for(String wordInDB : fileContent.get(i).split("\t | \t")[0].split(":")[1].split(",")){
+                    wordInDB = wordInDB.replaceAll("\\s+","");
+                    if (wordInMessage.equalsIgnoreCase(wordInDB)){
+                        if(!found){
+                            sendMessage("Here's what I found:");
+                        }
+                        found = true;
+                        System.out.println(fileContent.get(i).split(":")[0]);
+//                        System.out.println(fileContent.get(i).split("\t | \t")[2]);
+                        latestFound = fileContent.get(i).split("\t | \t")[2];
+                        sendMessage(fileContent.get(i).split("\t | \t")[2] + "\n\n");
+                    }
+                }
+            }
         }
         return 0;
     }
@@ -166,7 +191,7 @@ public class Bot extends javax.swing.JFrame {
                 keywords.remove(0);
             }
             try{
-                PrintWriter write = new PrintWriter(new FileOutputStream("/Users/Sina/NetBeansProjects/Bot/src/bot/data.txt", true));
+                PrintWriter write = new PrintWriter(new FileOutputStream("/Users/mac/Craft/bot/src/bot/data.txt", true));
                 write.print(this.messageID + ": ");
                 for(int i = 0; i < keywords.size(); i++){
                     if(i != keywords.size() -1 ){
@@ -178,7 +203,7 @@ public class Bot extends javax.swing.JFrame {
                 write.close();
             }
             catch(IOException e){
-                System.out.println("gg");
+                System.out.println("Writing to data.txt failed, please update the file directory.");
             }
         }
     }
@@ -255,4 +280,19 @@ public class Bot extends javax.swing.JFrame {
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
+
+    private boolean isGreeting(String userMessage) {
+        String[] hi = {"hi", "hello", "hey", "hai"};
+        for(String word : userMessage.split(" ")){
+            for(String h : hi){
+                if (word.equalsIgnoreCase(h))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private void sayHi() {
+        sendMessage("Yo");
+    }
 }

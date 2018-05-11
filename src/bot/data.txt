@@ -1,1 +1,3 @@
-1: name,sina	 | 	My name is Sina
+1: red,car	 | 	I have a red car
+2: hi	 | 	Hi
+3: hiii	 | 	hiii
