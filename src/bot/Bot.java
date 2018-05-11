@@ -304,19 +304,22 @@ public class Bot extends javax.swing.JFrame {
         if(sentenceLength < 6){
             if(sentenceLength == 5){
                 if(isYesNoQuestion(question)){
-                    pronoun = question.split(" ")[1];
-                    verb = question.split(" ")[2];
-                    if(!question.split(" ")[3].equalsIgnoreCase("to")){
-                        article = question.split(" ")[3];
-                        object = question.split(" ")[4];
+                    if(beOrElse(question) == 0){    //if it's not a "am,is,are" question.
+                        pronoun = question.split(" ")[1];
+                        verb = question.split(" ")[2];
+                        if(!question.split(" ")[3].equalsIgnoreCase("to")){
+                            article = question.split(" ")[3];
+                            object = question.split(" ")[4];
+                        }
+                        else{
+                            verb2 = question.split(" ")[4];
+                        }
+                        if(verb2.equals(""))
+                            sendMessage(yesOrNo(question) + " " + reversePronoun(pronoun) + " " + verb + " " + article + " " + object + ".");
+                        else
+                            sendMessage(yesOrNo(question) + " " + reversePronoun(pronoun) + " " + verb + " to "  + verb2 + ".");
                     }
-                    else{
-                        verb2 = question.split(" ")[4];
-                    }
-                    if(verb2.equals(""))
-                        sendMessage("Yes " + reversePronoun(pronoun) + " " + verb + " " + article + " " + object + ".");
-                    else
-                        sendMessage("Yes " + reversePronoun(pronoun) + " " + verb + " to "  + verb2 + ".");
+                    
                 }
             }
         }
@@ -331,6 +334,14 @@ public class Bot extends javax.swing.JFrame {
             return pronoun;
         
     }
+    int beOrElse(String question){
+        String[] be = {"am", "is", "are"};
+        for (String b : be){
+            if(question.split(" ")[0].equalsIgnoreCase(b))
+                return 1;   // am, is, are
+        }
+        return 0;   // do, does, should, shall, must, may, can, could, might, etc.
+    }
     private boolean isYesNoQuestion(String question) {
         String[] whQuestions = {"what", "why", "when", "where", "how", "who", "whose"};
         for (String q : whQuestions){
@@ -338,5 +349,9 @@ public class Bot extends javax.swing.JFrame {
                 return false;   // WH question
         }
         return true;      // yes/no question
+    }
+
+    private String yesOrNo(String question) {
+        
     }
 }
