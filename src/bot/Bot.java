@@ -18,9 +18,6 @@ import java.io.IOException;
 
 
 public class Bot extends javax.swing.JFrame {
-    final String PRP = "I you he she it we they what who";  //personal pronouns
-    final String POS = "mine yours his hers ours theirs";  //possessive pronouns
-    List<String> places = Arrays.asList("s", "s", "a");
     int messageID;
     
     /**
@@ -297,14 +294,33 @@ public class Bot extends javax.swing.JFrame {
     }
 
     private void pro(String question) {
-        String verb = "", pronoun = "";
-        
-        if(isYesNoQuestion(question)){
-            pronoun = question.split(" ")[1];
-            verb = question.split(" ")[2];
-            sendMessage("Yes " + reversePronoun(pronoun) + " " + verb + " it.");
+        guessPOS(question);
+    }
+    void guessPOS(String question){
+        // Part of Speech tagging on the fly! 
+        // using common sense probability in limited length sentences
+        String verb = "", pronoun = "", article = "",object = "", verb2 = "";
+        int sentenceLength = question.split(" ").length;
+        if(sentenceLength < 6){
+            if(sentenceLength == 5){
+                if(isYesNoQuestion(question)){
+                    pronoun = question.split(" ")[1];
+                    verb = question.split(" ")[2];
+                    if(!question.split(" ")[3].equalsIgnoreCase("to")){
+                        article = question.split(" ")[3];
+                        object = question.split(" ")[4];
+                    }
+                    else{
+                        verb2 = question.split(" ")[4];
+                    }
+                    if(verb2.equals(""))
+                        sendMessage("Yes " + reversePronoun(pronoun) + " " + verb + " " + article + " " + object + ".");
+                    else
+                        sendMessage("Yes " + reversePronoun(pronoun) + " " + verb + " to "  + verb2 + ".");
+                }
+            }
         }
-            
+        
     }
     String reversePronoun(String pronoun){
         if(pronoun.equalsIgnoreCase("i") || pronoun.equalsIgnoreCase("we"))
@@ -318,7 +334,6 @@ public class Bot extends javax.swing.JFrame {
     private boolean isYesNoQuestion(String question) {
         String[] whQuestions = {"what", "why", "when", "where", "how", "who", "whose"};
         for (String q : whQuestions){
-            System.out.println("checking" + question.split(" ")[0]);
             if(question.split(" ")[0].equalsIgnoreCase(q))
                 return false;   // WH question
         }
