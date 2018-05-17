@@ -2,3 +2,10 @@
 2: hi	 | 	Hi
 3: hiii	 | 	hiii
 4: good,person	 | 	are you a good person
+5: phone	 | 	I have a phone
+6: cow	 | 	I have a cow
+7: cow	 | 	i have a cow
+8: cow	 | 	i have a cow
+9: horse	 | 	I have a horse
+10: harry,bought,cat	 | 	Harry bought a cat
+11: horse	 | 	Do i have a horse

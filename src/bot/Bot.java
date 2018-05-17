@@ -123,9 +123,9 @@ public class Bot extends javax.swing.JFrame {
         pro(userMessage);
         
     }
-    void basic(String userMessage){
-        search(toArrayListString(removeStopwords(userMessage)));
-    }
+//    void basic(String userMessage){
+//        search(toArrayListString(removeStopwords(userMessage)));
+//    }
     
     ArrayList<String> readFromFile(){
         ArrayList<String> fileContent = new ArrayList<>();
@@ -143,7 +143,7 @@ public class Bot extends javax.swing.JFrame {
         return fileContent;
     }
     
-    String search(ArrayList<String> userMessage){
+    boolean search(ArrayList<String> userMessage){
         boolean found = false;
         String latestFound = "";
         ArrayList<String> fileContent = readFromFile();
@@ -164,7 +164,7 @@ public class Bot extends javax.swing.JFrame {
                 }
             }
         }
-        return "";
+        return found;
     }
     
     void learn(String userMessage){
@@ -294,36 +294,42 @@ public class Bot extends javax.swing.JFrame {
     }
 
     private void pro(String question) {
-        guessPOS(question);
+        guessPOS(question, true);
     }
-    void guessPOS(String question){
+    String[] guessPOS(String entry, boolean question){
         // Part of Speech tagging on the fly! 
         // using common sense probability in limited length sentences
         String verb = "", pronoun = "", article = "",object = "", verb2 = "";
-        int sentenceLength = question.split(" ").length;
+        int sentenceLength = entry.split(" ").length;
         if(sentenceLength < 6){
             if(sentenceLength == 5){
-                if(isYesNoQuestion(question)){
-                    if(beOrElse(question) == 0){    //if it's not a "am,is,are" question.
-                        pronoun = question.split(" ")[1];
-                        verb = question.split(" ")[2];
-                        if(!question.split(" ")[3].equalsIgnoreCase("to")){
-                            article = question.split(" ")[3];
-                            object = question.split(" ")[4];
+                if(question){
+                    if(isYesNoQuestion(entry)){
+                        if(beOrElse(entry) == 0){    //if it's not a "am,is,are" question.
+                            pronoun = entry.split(" ")[1];
+                            verb = entry.split(" ")[2];
+                            if(!entry.split(" ")[3].equalsIgnoreCase("to")){
+                                article = entry.split(" ")[3];
+                                object = entry.split(" ")[4];
+                            }
+                            else{
+                                verb2 = entry.split(" ")[4];
+                            }
+                            if(verb2.equals(""))
+                                sendMessage(yesOrNo(entry) + " " + reversePronoun(pronoun) + " " + verb + " " + article + " " + object + ".");
+                            else
+                                sendMessage(yesOrNo(entry) + " " + reversePronoun(pronoun) + " " + verb + " to "  + verb2 + ".");
                         }
-                        else{
-                            verb2 = question.split(" ")[4];
-                        }
-                        if(verb2.equals(""))
-                            sendMessage(yesOrNo(question) + " " + reversePronoun(pronoun) + " " + verb + " " + article + " " + object + ".");
-                        else
-                            sendMessage(yesOrNo(question) + " " + reversePronoun(pronoun) + " " + verb + " to "  + verb2 + ".");
                     }
-                    
                 }
             }
+            else if(sentenceLength == 4){
+                pronoun = entry.split(" ")[0];
+                
+            }
         }
-        
+        String[] pos = {verb, pronoun, article, object, verb2};
+        return pos;
     }
     String reversePronoun(String pronoun){
         if(pronoun.equalsIgnoreCase("i") || pronoun.equalsIgnoreCase("we"))
@@ -352,6 +358,9 @@ public class Bot extends javax.swing.JFrame {
     }
 
     private String yesOrNo(String question) {
-        
+        if(search(toArrayListString(removeStopwords(userMessage)))){
+            return "yes";
+        }
+        return "no";   
     }
 }
