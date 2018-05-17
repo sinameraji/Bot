@@ -9,3 +9,8 @@
 9: horse	 | 	I have a horse
 10: harry,bought,cat	 | 	Harry bought a cat
 11: horse	 | 	Do i have a horse
+12: want,car	 | 	i want a car
+13: eat,car	 | 	you eat a car
+14: car	 | 	he is a car
+15: guy	 | 	i am a guy
+16: saw,huge,cow	 | 	i saw a huge cow

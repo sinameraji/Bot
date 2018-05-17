@@ -118,11 +118,7 @@ public class Bot extends javax.swing.JFrame {
         }
     }
     
-    void answer(String userMessage){
-//        basic(userMessage); //just search keywords and return most similar statement from data.txt
-        pro(userMessage);
-        
-    }
+
 //    void basic(String userMessage){
 //        search(toArrayListString(removeStopwords(userMessage)));
 //    }
@@ -143,8 +139,11 @@ public class Bot extends javax.swing.JFrame {
         return fileContent;
     }
     
-    boolean search(ArrayList<String> userMessage){
+    ArrayList<Integer> classicSearch(ArrayList<String> userMessage){
         boolean found = false;
+//        int[] index = {-1};
+        ArrayList<Integer> index = new ArrayList<>();
+        index.add(-1);
         String latestFound = "";
         ArrayList<String> fileContent = readFromFile();
         for (String wordInMessage : userMessage){
@@ -152,19 +151,22 @@ public class Bot extends javax.swing.JFrame {
                 for(String wordInDB : fileContent.get(i).split("\t | \t")[0].split(":")[1].split(",")){
                     wordInDB = wordInDB.replaceAll("\\s+","");
                     if (wordInMessage.equalsIgnoreCase(wordInDB)){
-                        if(!found){
-                            sendMessage("Here's what I found:");
-                        }
+//                        if(!found){
+//                            sendMessage("Here's what I found:");
+//                        }
                         found = true;
-                        System.out.println(fileContent.get(i).split(":")[0]);
+                        index.add(i);
+                        if(index.get(0) == -1)
+                            index.remove(0);
+//                        System.out.println(fileContent.get(i).split(":")[0]);
 //                        System.out.println(fileContent.get(i).split("\t | \t")[2]);
                         latestFound = fileContent.get(i).split("\t | \t")[2];
-                        sendMessage(fileContent.get(i).split("\t | \t")[2] + "\n\n");
+//                        sendMessage(fileContent.get(i).split("\t | \t")[2] + "\n\n");
                     }
                 }
             }
         }
-        return found;
+        return index;
     }
     
     void learn(String userMessage){
@@ -207,8 +209,8 @@ public class Bot extends javax.swing.JFrame {
     
     ArrayList<String> messageToList(String sentence){
         ArrayList<String> targets = new ArrayList<>();
-        for (int i = 0; i < sentence.split(" ").length; i++){
-            targets.add(sentence.split(" ")[i]);
+        for (int i = 0; i < tokenize(sentence).length; i++){
+            targets.add(tokenize(sentence)[i]);
 //            System.out.println(sentence.split(" ")[i]);
         }
         return targets;
@@ -233,7 +235,7 @@ public class Bot extends javax.swing.JFrame {
 //        System.out.println(sentence);
 //        for(String word : sentence.split(" "))
 //            System.out.println(word);
-        return sentence.split(" ");
+        return tokenize(sentence);
     }
     
     public static void main(String args[]) {
@@ -280,7 +282,7 @@ public class Bot extends javax.swing.JFrame {
 
     private boolean isGreeting(String userMessage) {
         String[] hi = {"hi", "hello", "hey", "hai"};
-        for(String word : userMessage.split(" ")){
+        for(String word : tokenize(userMessage)){
             for(String h : hi){
                 if (word.equalsIgnoreCase(h))
                     return true;
@@ -293,39 +295,78 @@ public class Bot extends javax.swing.JFrame {
         sendMessage("Yo");
     }
 
-    private void pro(String question) {
-        guessPOS(question, true);
+    private void answer(String question) {
+        if(!isYesNoQuestion(question).equals("wh")){
+            String[] questionPOS = guessPOS(question, true);
+            if(!smartSearch(question, questionPOS).equals("")){
+                String temp = smartSearch(question, questionPOS);
+                sendMessage("yea I guess, since " + reversePronoun(tokenize(temp)[0]) +  " mentioned " + temp);
+            }
+            else 
+                sendMessage("Nope.");
+        }
+        
     }
+    String smartSearch(String question, String[] questionPOS){
+        ArrayList<Integer> index = classicSearch(toArrayListString(removeStopwords(question)));
+        int wordMatch = 0;
+        int indexOfMostProbableAnswer = -1;
+        int wordMatchOld = 0;
+        if(index.get(0) != -1){
+            ArrayList<String> fileContent = readFromFile();
+            for (int i = 0; i < index.size(); i++){
+                for (String token : tokenize(fileContent.get(index.get(i)).split("\t | \t")[2])){
+                    for (String word : tokenize(question)){
+                        if (token.equalsIgnoreCase(word))
+                            wordMatch++;
+                    }
+                }
+                if (wordMatch > wordMatchOld){
+                    indexOfMostProbableAnswer = i;
+                }
+                wordMatchOld = wordMatch;
+                wordMatch = 0;
+            }
+            System.out.println(fileContent.get(index.get(indexOfMostProbableAnswer)).split("\t | \t")[2]);
+            return fileContent.get(index.get(indexOfMostProbableAnswer)).split("\t | \t")[2];
+        }
+        return "";
+    }
+    String[] tokenize(String message){
+        return message.split((" "));
+    }
+    
     String[] guessPOS(String entry, boolean question){
         // Part of Speech tagging on the fly! 
         // using common sense probability in limited length sentences
         String verb = "", pronoun = "", article = "",object = "", verb2 = "";
-        int sentenceLength = entry.split(" ").length;
+        int sentenceLength = tokenize(entry).length;
         if(sentenceLength < 6){
             if(sentenceLength == 5){
                 if(question){
-                    if(isYesNoQuestion(entry)){
+                    if(!isYesNoQuestion(entry).equals("wh")){
                         if(beOrElse(entry) == 0){    //if it's not a "am,is,are" question.
-                            pronoun = entry.split(" ")[1];
-                            verb = entry.split(" ")[2];
-                            if(!entry.split(" ")[3].equalsIgnoreCase("to")){
-                                article = entry.split(" ")[3];
-                                object = entry.split(" ")[4];
+                            pronoun = tokenize(entry)[1];
+                            verb = tokenize(entry)[2];
+                            if(!tokenize(entry)[3].equalsIgnoreCase("to")){
+                                article = tokenize(entry)[3];
+                                object = tokenize(entry)[4];
                             }
                             else{
-                                verb2 = entry.split(" ")[4];
+                                verb2 = tokenize(entry)[4];
                             }
-                            if(verb2.equals(""))
-                                sendMessage(yesOrNo(entry) + " " + reversePronoun(pronoun) + " " + verb + " " + article + " " + object + ".");
-                            else
-                                sendMessage(yesOrNo(entry) + " " + reversePronoun(pronoun) + " " + verb + " to "  + verb2 + ".");
                         }
                     }
                 }
             }
             else if(sentenceLength == 4){
-                pronoun = entry.split(" ")[0];
-                
+                if(!question){
+                    String[] tokens = tokenize(entry);
+                    pronoun = tokens[0];
+                    verb = tokens[1];
+                    article = tokens[2];
+                    object = tokens[3];
+                }   
             }
         }
         String[] pos = {verb, pronoun, article, object, verb2};
@@ -343,24 +384,19 @@ public class Bot extends javax.swing.JFrame {
     int beOrElse(String question){
         String[] be = {"am", "is", "are"};
         for (String b : be){
-            if(question.split(" ")[0].equalsIgnoreCase(b))
+            if(tokenize(question)[0].equalsIgnoreCase(b))
                 return 1;   // am, is, are
         }
         return 0;   // do, does, should, shall, must, may, can, could, might, etc.
     }
-    private boolean isYesNoQuestion(String question) {
+    private String isYesNoQuestion(String question) {
         String[] whQuestions = {"what", "why", "when", "where", "how", "who", "whose"};
         for (String q : whQuestions){
-            if(question.split(" ")[0].equalsIgnoreCase(q))
-                return false;   // WH question
+            if(tokenize(question)[0].equalsIgnoreCase(q))
+                return "wh";   // WH question
         }
-        return true;      // yes/no question
+        return tokenize(question)[0];      // yes/no question
     }
 
-    private String yesOrNo(String question) {
-        if(search(toArrayListString(removeStopwords(userMessage)))){
-            return "yes";
-        }
-        return "no";   
-    }
+    
 }
