@@ -296,14 +296,24 @@ public class Bot extends javax.swing.JFrame {
     }
 
     private void answer(String question) {
-        if(!isYesNoQuestion(question).equals("wh")){
+        if(!getType(question).equals("wh")){
             String[] questionPOS = guessPOS(question, true);
             if(!smartSearch(question, questionPOS).equals("")){
                 String temp = smartSearch(question, questionPOS);
-                sendMessage("yea I guess, since " + reversePronoun(tokenize(temp)[0]) +  " mentioned " + temp);
+                sendMessage("yea I guess, since " + reversePronoun(tokenize(question)[1]) +  " mentioned " + "\"" + temp + "\"");
             }
             else 
-                sendMessage("Nope.");
+                sendMessage("Doubt so.");
+        }
+        else{
+            ArrayList<Integer> index = classicSearch(toArrayListString(removeStopwords(question)));
+            
+            ArrayList<String> fileContent = readFromFile();
+            sendMessage("Here's what I found:");
+            for (int i = 0; i < index.size(); i++){
+                sendMessage(fileContent.get(index.get(i)).split("\t | \t")[2]);
+            }
+            
         }
         
     }
@@ -344,7 +354,7 @@ public class Bot extends javax.swing.JFrame {
         if(sentenceLength < 6){
             if(sentenceLength == 5){
                 if(question){
-                    if(!isYesNoQuestion(entry).equals("wh")){
+                    if(!getType(entry).equals("wh")){
                         if(beOrElse(entry) == 0){    //if it's not a "am,is,are" question.
                             pronoun = tokenize(entry)[1];
                             verb = tokenize(entry)[2];
@@ -389,7 +399,7 @@ public class Bot extends javax.swing.JFrame {
         }
         return 0;   // do, does, should, shall, must, may, can, could, might, etc.
     }
-    private String isYesNoQuestion(String question) {
+    private String getType(String question) {
         String[] whQuestions = {"what", "why", "when", "where", "how", "who", "whose"};
         for (String q : whQuestions){
             if(tokenize(question)[0].equalsIgnoreCase(q))

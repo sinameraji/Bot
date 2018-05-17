@@ -14,3 +14,4 @@
 14: car	 | 	he is a car
 15: guy	 | 	i am a guy
 16: saw,huge,cow	 | 	i saw a huge cow
+17: car	 | 	i have a car because i can
